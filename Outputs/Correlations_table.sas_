@@ -1,0 +1,46 @@
+/*rename variables*/
+proc import datafile="/home/u64046075/Car_emissions/2023_Cars_Aggregated(1).csv"
+out=car_data
+dbms=csv replace;
+run;
+
+proc contents data=car_data varnum;
+run;
+
+
+data car_data;
+    set car_data(rename=(
+        'WLTP Fuel con (l/100 km)'n              = WLTP_Fuel_cons
+        'OBFCM Fuel consumption (l/100 km'n      = OBFCM_Fuel_cons
+        'absolute gap Fuel cons (l/100 km'n      = AbsGap_Fuel_cons
+        'percentage gap Fuel con'n               = PctGap_Fuel_cons
+        'WLTP CO2 emissions (g/km)'n             = WLTP_CO2
+        'OBFCM CO2 emissions (g/km)'n            = OBFCM_CO2
+        'absolute gap CO2 emissions (g/km'n      = AbsGap_CO2
+        'percentage gap CO2 emissions (%)'n      = PctGap_CO2
+    ));
+run;
+
+
+
+
+/*Check all correlations*/
+proc corr data=car_data plots=matrix(histogram);
+    var 
+        WLTP_Fuel_cons
+        OBFCM_Fuel_cons
+        AbsGap_Fuel_cons
+        PctGap_Fuel_cons
+        WLTP_CO2
+        OBFCM_CO2
+        AbsGap_CO2
+        PctGap_CO2;
+run;
+
+/*Save correlations into a table*/
+proc corr data=car_data outp=corr_table;
+    var WLTP_Fuel_cons OBFCM_Fuel_cons AbsGap_Fuel_cons PctGap_Fuel_cons
+        WLTP_CO2 OBFCM_CO2 AbsGap_CO2 PctGap_CO2;
+run;
+
+
