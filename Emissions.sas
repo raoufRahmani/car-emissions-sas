@@ -47,9 +47,36 @@ tables Manufacturer /nocum;
 run;
 
 /*CO2 Emissions*/
-proc means data=in.car_data;
-var 'WLTP CO2 emissions (g/km)'n;
+/*Summarize CO2 emissions by Manufacturer */
+proc means data=in.car_data noprint;
+    class Manufacturer;
+    var 'WLTP CO2 emissions (g/km)'n;
+    output out=summary_CO2 mean=mean_CO2;
 run;
+
+
+data summary_CO2_clean;
+    set summary_CO2;
+    if _TYPE_ = 1;
+    drop _TYPE_ _FREQ_;
+run;
+
+/*mean CO2 emissions per Manufacturer */
+proc sgplot data=summary_CO2_clean;
+    hbar Manufacturer / response=mean_CO2 datalabel;
+    yaxis label="Manufacturer";
+    xaxis label="WLTP CO2 emissions (g/km)";
+run;
+
+/*Check distributions*/
+proc univariate data=in.car_data;
+    var 'WLTP Fuel consumption (l/100 km)'n;
+    histogram / normal;
+run;
+
+
+Check relationships (correlation)
+
 
 
 
