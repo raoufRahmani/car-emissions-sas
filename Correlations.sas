@@ -8,8 +8,6 @@ proc contents data=car_data varnum;
 run;
 
 
-proc print data=in.car_data;
-run;
 data car_data;
     set car_data(rename=(
         'WLTP Fuel con (l/100 km)'n              = WLTP_Fuel_cons
@@ -38,3 +36,33 @@ proc corr data=car_data plots=matrix(histogram);
         AbsGap_CO2
         PctGap_CO2;
 run;
+
+/*Save correlations into a table*/
+proc corr data=car_data outp=corr_table;
+    var WLTP_Fuel_cons OBFCM_Fuel_cons AbsGap_Fuel_cons PctGap_Fuel_cons
+        WLTP_CO2 OBFCM_CO2 AbsGap_CO2 PctGap_CO2;
+run;
+
+/*Visualise the correlation betwwen Fuel consumption and CO2 emissions*/
+proc sgplot data=car_data;
+    scatter x=WLTP_Fuel_cons y=WLTP_CO2 / markerattrs=(symbol=CircleFilled color=blue);
+    title "WLTP Fuel Consumption vs WLTP CO2 Emissions";
+    xaxis label="WLTP Fuel Consumption (l/100 km)";
+    yaxis label="WLTP CO2 Emissions (g/km)";
+run;
+
+
+
+/*Linear Regression*/
+
+proc reg data=car_data plots=none; 
+	model WLTP_CO2 = OBFCM_Fuel_cons; run;
+
+/*Mutiple Linear Regression*/
+proc glm data=car_data;
+    class Manufacturer 'Fuel Type'n;
+    model WLTP_Fuel_cons = OBFCM_Fuel_cons 'Number of vehicles'n Manufacturer 'Fuel Type'n / solution;
+run;
+
+
+
